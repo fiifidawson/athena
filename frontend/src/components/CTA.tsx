@@ -3,8 +3,8 @@ import { ArrowRight } from 'lucide-react';
 
 export default function CTA() {
   return (
-    <section className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="relative py-16 md:py-32">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -17,11 +17,11 @@ export default function CTA() {
           <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-athena-amber/10 blur-3xl" />
           <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-athena-red/10 blur-3xl" />
 
-          <div className="relative px-8 py-16 text-center md:px-16 md:py-24">
-            <h2 className="text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+          <div className="relative px-5 py-12 text-center md:px-16 md:py-24">
+            <h2 className="text-2xl font-bold text-white sm:text-3xl md:text-4xl lg:text-5xl">
               Ready to accelerate your drug discovery?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-athena-text">
+            <p className="mx-auto mt-4 max-w-xl text-base md:text-lg text-athena-text">
               Stop reinventing ML pipelines. Start running experiments that matter.
               Athena is open source and ready to use.
             </p>
@@ -29,14 +29,14 @@ export default function CTA() {
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <a
                 href="#"
-                className="group flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 font-medium text-athena-dark transition-all hover:shadow-lg hover:shadow-white/10"
+                className="group flex items-center gap-2 rounded-xl bg-white px-6 py-3 md:px-8 md:py-3.5 text-sm md:text-base font-medium text-athena-dark transition-all hover:shadow-lg hover:shadow-white/10"
               >
                 Get started
                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
               </a>
               <a
                 href="#"
-                className="rounded-xl border border-white/20 px-8 py-3.5 font-medium text-white transition-all hover:bg-white/10"
+                className="rounded-xl border border-white/20 px-6 py-3 md:px-8 md:py-3.5 text-sm md:text-base font-medium text-white transition-all hover:bg-white/10"
               >
                 Read the docs
               </a>
