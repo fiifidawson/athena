@@ -17,32 +17,26 @@ const terminalLines = [
   { text: 'Benchmark vs. baselines: +4.2% over MoleculeNet SOTA', color: 'var(--color-athena-cyan)' },
 ];
 
-const STAGE_MS = 2000;
-const DONE_HOLD_MS = 2500;
-const RESET_MS = 1000;
+const STAGE_MS = 2500;
+const DONE_HOLD_MS = 3000;
+const RESET_MS = 1500;
 
 export default function PipelineVisualization() {
   // -1 = reset, 0..4 = active stage, 5 = done/holding
   const [activeStage, setActiveStage] = useState(-1);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+    const delay =
+      activeStage < 0 ? RESET_MS
+        : activeStage >= stages.length ? DONE_HOLD_MS
+          : STAGE_MS;
 
-    const tick = () => {
-      setActiveStage((prev) => {
-        const next = prev + 1;
-        if (next > stages.length) {
-          timer = setTimeout(tick, RESET_MS);
-          return -1;
-        }
-        timer = setTimeout(tick, next === stages.length ? DONE_HOLD_MS : STAGE_MS);
-        return next;
-      });
-    };
+    const timer = setTimeout(() => {
+      setActiveStage((prev) => (prev >= stages.length ? -1 : prev + 1));
+    }, delay);
 
-    timer = setTimeout(tick, 800);
     return () => clearTimeout(timer);
-  }, []);
+  }, [activeStage]);
 
   const getStatus = (index: number) => {
     if (activeStage < 0) return 'pending';
@@ -101,39 +95,23 @@ export default function PipelineVisualization() {
                       transition={{ duration: 0.5, ease: 'easeOut' }}
                       className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full"
                     >
-                      <AnimatePresence mode="wait">
-                        {status === 'complete' ? (
-                          <motion.svg
-                            key="check"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.5 }}
-                            transition={{ duration: 0.2 }}
-                            className="h-5 w-5 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2.5}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </motion.svg>
-                        ) : (
-                          <motion.span
-                            key="number"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.5 }}
-                            transition={{ duration: 0.2 }}
-                            className="text-xs font-bold text-white"
-                          >
-                            {i + 1}
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
+                      {status === 'complete' ? (
+                        <svg
+                          className="h-5 w-5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2.5}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      ) : (
+                        <span className="text-xs font-bold text-white">{i + 1}</span>
+                      )}
                     </motion.div>
                     <motion.span
                       animate={{
@@ -205,23 +183,20 @@ export default function PipelineVisualization() {
             <span>athena run --dataset chembl_egfr --task classification --benchmark</span>
           </div>
           <div className="mt-2 space-y-1">
-            <AnimatePresence mode="popLayout">
-              {terminalLines.map((line, i) => {
-                if (getStatus(i) === 'pending') return null;
-                return (
-                  <motion.div
-                    key={line.text}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.35, ease: 'easeOut' }}
-                    className="text-athena-text/70"
-                  >
-                    <span style={{ color: line.color }}>→</span> {line.text}
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+            {terminalLines.map((line, i) => {
+              const visible = getStatus(i) !== 'pending';
+              return (
+                <motion.div
+                  key={line.text}
+                  initial={false}
+                  animate={{ opacity: visible ? 1 : 0, height: visible ? 'auto' : 0 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  className="overflow-hidden text-athena-text/70"
+                >
+                  <span style={{ color: line.color }}>→</span> {line.text}
+                </motion.div>
+              );
+            })}
           </div>
           <AnimatePresence>
             {activeStage >= stages.length && (
