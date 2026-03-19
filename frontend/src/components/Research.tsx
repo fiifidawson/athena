@@ -46,8 +46,8 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section id="how-it-works" className="relative py-16 md:py-32">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -58,17 +58,17 @@ export default function HowItWorks() {
           <span className="text-sm font-medium uppercase tracking-wider text-athena-purple">
             How It Works
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+          <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl md:text-4xl lg:text-5xl">
             From target to benchmark in minutes
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-athena-text">
+          <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg text-athena-text">
             Athena replaces weeks of manual ML engineering with a streamlined, automated
             workflow designed by drug discovery researchers.
           </p>
         </motion.div>
 
         {/* Steps */}
-        <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-5 md:gap-5">
+        <div className="mt-10 md:mt-16 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5 md:gap-5">
           {steps.map((item, i) => (
             <motion.div
               key={item.step}
@@ -76,18 +76,18 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className={`group relative flex aspect-square flex-col justify-between rounded-xl border ${item.borderColor} bg-athena-card/30 p-5 transition-colors hover:bg-athena-card/50`}
+              className={`group relative flex h-full flex-col rounded-xl border ${item.borderColor} bg-athena-card/30 p-5 transition-colors hover:bg-athena-card/50`}
             >
               {/* Step number */}
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-athena-dark/80 font-mono text-sm font-bold ${item.color}`}>
                 {item.step}
               </div>
 
-              {/* Content */}
-              <div>
-                <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-athena-text">{item.description}</p>
-              </div>
+              {/* Title — fixed position below badge */}
+              <h3 className="mt-4 text-sm font-semibold text-white">{item.title}</h3>
+
+              {/* Description — fills remaining space */}
+              <p className="mt-1.5 flex-1 text-xs leading-relaxed text-athena-text">{item.description}</p>
             </motion.div>
           ))}
         </div>
@@ -98,7 +98,7 @@ export default function HowItWorks() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-12 flex items-center justify-center gap-3 rounded-xl border border-athena-amber/20 bg-athena-amber/5 p-6"
+          className="mt-8 md:mt-12 flex items-center justify-center gap-3 rounded-xl border border-athena-amber/20 bg-athena-amber/5 p-4 md:p-6"
         >
           <Lightbulb size={20} className="shrink-0 text-athena-amber" />
           <p className="text-sm text-athena-text">

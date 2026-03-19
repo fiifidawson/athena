@@ -39,10 +39,10 @@ const techStack = [
 
 export default function About() {
   return (
-    <section id="about" className="relative py-24 md:py-32">
+    <section id="about" className="relative py-16 md:py-32">
       <div className="absolute inset-0 bg-gradient-to-b from-athena-dark via-athena-darker to-athena-dark" />
 
-      <div className="relative mx-auto max-w-7xl px-6">
+      <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -53,7 +53,7 @@ export default function About() {
           <span className="text-sm font-medium uppercase tracking-wider text-athena-cyan">
             About
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+          <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl md:text-4xl lg:text-5xl">
             Why Athena?
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-athena-text">
@@ -63,7 +63,7 @@ export default function About() {
         </motion.div>
 
         {/* Highlights */}
-        <div className="mt-16 grid gap-6 md:grid-cols-2">
+        <div className="mt-10 md:mt-16 grid gap-4 md:gap-6 md:grid-cols-2">
           {highlights.map((item, i) => (
             <motion.div
               key={item.title}
@@ -71,7 +71,7 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="rounded-xl border border-athena-border bg-athena-card/30 p-6 transition-colors hover:border-athena-border/80"
+              className="rounded-xl border border-athena-border bg-athena-card/30 p-5 md:p-6 transition-colors hover:border-athena-border/80"
             >
               <div className="flex items-start gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-athena-amber/10">

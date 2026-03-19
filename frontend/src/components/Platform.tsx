@@ -38,10 +38,10 @@ const capabilities = [
 
 export default function Platform() {
   return (
-    <section id="platform" className="relative py-24 md:py-32">
+    <section id="platform" className="relative py-16 md:py-32">
       <div className="absolute inset-0 bg-gradient-to-b from-athena-dark via-athena-darker to-athena-dark" />
 
-      <div className="relative mx-auto max-w-7xl px-6">
+      <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -53,22 +53,22 @@ export default function Platform() {
           <span className="text-sm font-medium uppercase tracking-wider text-athena-emerald">
             Platform
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+          <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl md:text-4xl lg:text-5xl">
             Your drug discovery command center
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-athena-text">
+          <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg text-athena-text">
             Athena gives you a visual dashboard and CLI to manage experiments, track results,
             and iterate on models — all from one place.
           </p>
         </motion.div>
 
-        {/* Platform Preview */}
+        {/* Platform Preview — hidden on mobile (too complex for small screens) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-16 overflow-hidden rounded-2xl border border-athena-border glow"
+          className="mt-16 hidden md:block overflow-hidden rounded-2xl border border-athena-border glow"
         >
           <div className="bg-athena-card/80 p-1">
             <div className="rounded-xl bg-athena-darker/80">
@@ -183,7 +183,7 @@ export default function Platform() {
         </motion.div>
 
         {/* Capabilities */}
-        <div className="mt-20 grid gap-6 md:grid-cols-2">
+        <div className="mt-10 md:mt-20 grid gap-4 md:gap-6 md:grid-cols-2">
           {capabilities.map((cap, i) => (
             <motion.div
               key={cap.title}
@@ -191,7 +191,7 @@ export default function Platform() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="rounded-2xl border border-athena-border bg-athena-card/30 p-8 transition-colors hover:border-athena-border/80"
+              className="rounded-2xl border border-athena-border bg-athena-card/30 p-5 md:p-8 transition-colors hover:border-athena-border/80"
             >
               <div className={`inline-flex rounded-xl p-3 ${cap.bgColor}`}>
                 <cap.icon size={24} className={cap.color} />

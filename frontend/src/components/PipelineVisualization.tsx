@@ -48,8 +48,8 @@ export default function PipelineVisualization() {
   const progress = activeStage < 0 ? 0 : Math.min(activeStage / (stages.length - 1), 1);
 
   return (
-    <div className="glow relative overflow-hidden rounded-2xl border border-athena-border bg-athena-card/80 p-1">
-      <div className="rounded-xl bg-athena-darker/80 p-8 md:p-12">
+    <div className="glow relative overflow-hidden rounded-xl md:rounded-2xl border border-athena-border bg-athena-card/80 p-1">
+      <div className="rounded-lg md:rounded-xl bg-athena-darker/80 p-4 md:p-8 lg:p-12">
 
         {/* ── Desktop pipeline ── */}
         <div className="hidden md:block">
@@ -176,8 +176,8 @@ export default function PipelineVisualization() {
           })}
         </div>
 
-        {/* Terminal-style output */}
-        <div className="mt-10 rounded-lg border border-athena-border bg-athena-dark/80 p-4 font-mono text-xs md:text-sm">
+        {/* Terminal-style output — hidden on mobile */}
+        <div className="mt-6 md:mt-10 hidden md:block rounded-lg border border-athena-border bg-athena-dark/80 p-4 font-mono text-xs md:text-sm">
           <div className="flex items-center gap-2 text-athena-text">
             <span className="text-athena-emerald">$</span>
             <span>athena run --dataset chembl_egfr --task classification --benchmark</span>
@@ -186,15 +186,13 @@ export default function PipelineVisualization() {
             {terminalLines.map((line, i) => {
               const visible = getStatus(i) !== 'pending';
               return (
-                <motion.div
+                <div
                   key={line.text}
-                  initial={false}
-                  animate={{ opacity: visible ? 1 : 0, height: visible ? 'auto' : 0 }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                  className="overflow-hidden text-athena-text/70"
+                  className="text-athena-text/70 transition-opacity duration-400 ease-out"
+                  style={{ opacity: visible ? 1 : 0 }}
                 >
                   <span style={{ color: line.color }}>→</span> {line.text}
-                </motion.div>
+                </div>
               );
             })}
           </div>

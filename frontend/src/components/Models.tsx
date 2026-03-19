@@ -103,8 +103,8 @@ const bgColorMap: Record<string, string> = {
 
 export default function Pipeline() {
   return (
-    <section id="pipeline" className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section id="pipeline" className="relative py-16 md:py-32">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -116,7 +116,7 @@ export default function Pipeline() {
           <span className="text-sm font-medium uppercase tracking-wider text-athena-amber">
             The Pipeline
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+          <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl md:text-4xl lg:text-5xl">
             Five stages. Zero guesswork.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-athena-text">
@@ -136,8 +136,8 @@ export default function Pipeline() {
           <PipelineVisualization />
         </motion.div>
 
-        {/* Stage Cards — top row of 3, bottom row of 2 centered */}
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        {/* Stage Cards — hidden on mobile, top row of 3, bottom row of 2 centered */}
+        <div className="mt-12 hidden md:grid gap-6 md:grid-cols-3">
           {stages.slice(0, 3).map((stage, i) => (
             <motion.div
               key={stage.name}
@@ -174,7 +174,7 @@ export default function Pipeline() {
             </motion.div>
           ))}
         </div>
-        <div className="mt-6 grid gap-6 md:grid-cols-2 md:mx-auto md:max-w-4xl">
+        <div className="mt-6 hidden md:grid gap-6 md:grid-cols-2 md:mx-auto md:max-w-4xl">
           {stages.slice(3).map((stage, i) => (
             <motion.div
               key={stage.name}
