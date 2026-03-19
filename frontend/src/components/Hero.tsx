@@ -1,23 +1,21 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Github } from 'lucide-react';
-import PipelineVisualization from './PipelineVisualization';
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen overflow-hidden pt-20">
-      {/* Background Effects */}
+    <section className="relative min-h-screen overflow-hidden">
+      {/* Subtle grid background */}
       <div className="grid-bg absolute inset-0" />
-      <div className="molecule-glow absolute inset-0" />
-      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-athena-amber/5 blur-3xl" />
 
-      <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pt-24 lg:pt-32">
-        {/* Announcement Badge */}
+      {/* ── Text content ── */}
+      <div className="relative z-20 mx-auto flex max-w-7xl flex-col items-center px-6 pt-32 lg:pt-40">
+        {/* Badge */}
         <motion.a
           href="#pipeline"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8 flex items-center gap-2 rounded-full border border-athena-border bg-athena-card/50 px-4 py-1.5 text-sm backdrop-blur-sm transition-colors hover:border-athena-amber/40"
+          className="mb-8 flex items-center gap-2 rounded-full border border-athena-border/80 bg-athena-card/60 px-4 py-1.5 text-sm backdrop-blur-sm transition-colors hover:border-athena-amber/40"
         >
           <span className="rounded-full bg-athena-amber/20 px-2 py-0.5 text-xs font-medium text-athena-amber-light">
             Open Source
@@ -63,7 +61,7 @@ export default function Hero() {
           </a>
           <a
             href="#"
-            className="flex items-center gap-2 rounded-xl border border-athena-border px-6 py-3 font-medium text-athena-text-bright transition-all hover:border-athena-amber/50 hover:bg-athena-card/50"
+            className="flex items-center gap-2 rounded-xl border border-athena-border bg-athena-dark/40 px-6 py-3 font-medium text-athena-text-bright backdrop-blur-sm transition-all hover:border-athena-amber/50 hover:bg-athena-card/50"
           >
             <Github size={18} />
             View on GitHub
@@ -75,7 +73,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-16 flex flex-wrap items-center justify-center gap-8 border-t border-athena-border/50 pt-8 md:gap-16"
+          className="mt-16 flex flex-wrap items-center justify-center gap-8 rounded-2xl border border-athena-border/50 bg-athena-card/30 px-8 py-6 backdrop-blur-sm md:gap-16"
         >
           <div className="text-center">
             <div className="text-2xl font-bold text-white">5 Stages</div>
@@ -94,17 +92,10 @@ export default function Hero() {
             <div className="mt-1 text-sm text-athena-text">MIT licensed</div>
           </div>
         </motion.div>
-
-        {/* Pipeline Visualization */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-16 w-full max-w-4xl"
-        >
-          <PipelineVisualization />
-        </motion.div>
       </div>
+
+      {/* Bottom fade */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-32 bg-gradient-to-t from-athena-dark to-transparent" />
     </section>
   );
 }

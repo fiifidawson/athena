@@ -1,53 +1,201 @@
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const stages = [
-  { label: 'Data Selection', color: 'bg-athena-amber', status: 'complete' },
-  { label: 'Featurization', color: 'bg-athena-orange', status: 'complete' },
-  { label: 'Model Training', color: 'bg-athena-red', status: 'active' },
-  { label: 'Evaluation', color: 'bg-athena-purple', status: 'pending' },
-  { label: 'Benchmarking', color: 'bg-athena-cyan', status: 'pending' },
+  { label: 'Data Selection', color: 'var(--color-athena-amber)' },
+  { label: 'Featurization', color: 'var(--color-athena-orange)' },
+  { label: 'Model Training', color: 'var(--color-athena-red)' },
+  { label: 'Evaluation', color: 'var(--color-athena-purple)' },
+  { label: 'Benchmarking', color: 'var(--color-athena-cyan)' },
 ];
 
+const terminalLines = [
+  { text: 'Loading ChEMBL EGFR dataset (4,821 compounds)...', color: 'var(--color-athena-amber)' },
+  { text: 'Generating molecular fingerprints & descriptors...', color: 'var(--color-athena-orange)' },
+  { text: 'Training 12 models: RF, XGBoost, GNN, AttentiveFP...', color: 'var(--color-athena-red)' },
+  { text: 'Cross-validation: best AUROC 0.923 (AttentiveFP)', color: 'var(--color-athena-purple)' },
+  { text: 'Benchmark vs. baselines: +4.2% over MoleculeNet SOTA', color: 'var(--color-athena-cyan)' },
+];
+
+const STAGE_MS = 2000;
+const DONE_HOLD_MS = 2500;
+const RESET_MS = 1000;
+
 export default function PipelineVisualization() {
+  // -1 = reset, 0..4 = active stage, 5 = done/holding
+  const [activeStage, setActiveStage] = useState(-1);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      setActiveStage((prev) => {
+        const next = prev + 1;
+        if (next > stages.length) {
+          timer = setTimeout(tick, RESET_MS);
+          return -1;
+        }
+        timer = setTimeout(tick, next === stages.length ? DONE_HOLD_MS : STAGE_MS);
+        return next;
+      });
+    };
+
+    timer = setTimeout(tick, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const getStatus = (index: number) => {
+    if (activeStage < 0) return 'pending';
+    if (index < activeStage) return 'complete';
+    if (index === activeStage) return 'active';
+    return 'pending';
+  };
+
+  const progress = activeStage < 0 ? 0 : Math.min(activeStage / (stages.length - 1), 1);
+
   return (
     <div className="glow relative overflow-hidden rounded-2xl border border-athena-border bg-athena-card/80 p-1">
       <div className="rounded-xl bg-athena-darker/80 p-8 md:p-12">
-        {/* Pipeline stages */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-0">
-          {stages.map((stage, i) => (
-            <div key={stage.label} className="flex flex-1 items-center">
-              <div className="flex flex-1 flex-col items-center gap-2">
+
+        {/* ── Desktop pipeline ── */}
+        <div className="hidden md:block">
+          <div className="relative">
+            {/* Track background — spans between first and last circle centers */}
+            <div
+              className="absolute top-5 h-0.5 rounded-full bg-athena-border"
+              style={{ left: 20, right: 20 }}
+            />
+
+            {/* Track progress fill */}
+            <motion.div
+              className="absolute top-5 h-0.5 origin-left rounded-full"
+              style={{
+                left: 20,
+                background:
+                  'linear-gradient(90deg, var(--color-athena-amber), var(--color-athena-orange), var(--color-athena-red), var(--color-athena-purple), var(--color-athena-cyan))',
+              }}
+              animate={{
+                width: `calc(${progress * 100}% - ${progress * 40}px)`,
+              }}
+              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+            />
+
+            {/* Stage nodes — evenly spaced */}
+            <div className="relative flex justify-between">
+              {stages.map((stage, i) => {
+                const status = getStatus(i);
+                return (
+                  <div key={stage.label} className="flex flex-col items-center gap-2.5">
+                    <motion.div
+                      animate={{
+                        scale: status === 'active' ? 1.1 : 1,
+                        backgroundColor:
+                          status !== 'pending'
+                            ? stage.color
+                            : 'var(--color-athena-border)',
+                        boxShadow:
+                          status === 'active'
+                            ? `0 0 20px ${stage.color}`
+                            : '0 0 0px transparent',
+                      }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                      className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full"
+                    >
+                      <AnimatePresence mode="wait">
+                        {status === 'complete' ? (
+                          <motion.svg
+                            key="check"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.5 }}
+                            transition={{ duration: 0.2 }}
+                            className="h-5 w-5 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </motion.svg>
+                        ) : (
+                          <motion.span
+                            key="number"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.5 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-xs font-bold text-white"
+                          >
+                            {i + 1}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                    <motion.span
+                      animate={{
+                        color:
+                          status === 'pending'
+                            ? 'rgba(148, 163, 184, 0.5)'
+                            : 'var(--color-athena-text-bright)',
+                      }}
+                      transition={{ duration: 0.4 }}
+                      className="text-xs font-medium"
+                    >
+                      {stage.label}
+                    </motion.span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Mobile pipeline (vertical) ── */}
+        <div className="flex flex-col gap-3 md:hidden">
+          {stages.map((stage, i) => {
+            const status = getStatus(i);
+            return (
+              <div key={stage.label} className="flex items-center gap-3">
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.6 + i * 0.1 }}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                    stage.status === 'complete'
-                      ? stage.color
-                      : stage.status === 'active'
-                        ? `${stage.color} animate-pulse`
-                        : 'bg-athena-border'
-                  }`}
+                  animate={{
+                    backgroundColor:
+                      status !== 'pending'
+                        ? stage.color
+                        : 'var(--color-athena-border)',
+                  }}
+                  transition={{ duration: 0.4 }}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
                 >
-                  {stage.status === 'complete' ? (
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  {status === 'complete' ? (
+                    <svg
+                      className="h-4 w-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   ) : (
-                    <span className="text-xs font-bold text-white">{i + 1}</span>
+                    <span className="text-[10px] font-bold text-white">{i + 1}</span>
                   )}
                 </motion.div>
-                <span className={`text-xs font-medium ${stage.status === 'pending' ? 'text-athena-text/50' : 'text-athena-text-bright'}`}>
+                <span
+                  className={`text-xs font-medium ${status === 'pending' ? 'text-athena-text/50' : 'text-athena-text-bright'}`}
+                >
                   {stage.label}
                 </span>
               </div>
-              {i < stages.length - 1 && (
-                <div className="hidden h-0.5 w-full md:block">
-                  <div className={`h-full ${stage.status === 'complete' ? 'bg-athena-amber/40' : 'bg-athena-border'}`} />
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Terminal-style output */}
@@ -56,16 +204,38 @@ export default function PipelineVisualization() {
             <span className="text-athena-emerald">$</span>
             <span>athena run --dataset chembl_egfr --task classification --benchmark</span>
           </div>
-          <div className="mt-2 space-y-1 text-athena-text/70">
-            <div><span className="text-athena-amber">→</span> Loading ChEMBL EGFR dataset (4,821 compounds)...</div>
-            <div><span className="text-athena-amber">→</span> Generating molecular fingerprints &amp; descriptors...</div>
-            <div><span className="text-athena-red">→</span> Training 12 models: RF, XGBoost, GNN, AttentiveFP...</div>
-            <div><span className="text-athena-purple">→</span> Cross-validation: best AUROC 0.923 (AttentiveFP)</div>
-            <div><span className="text-athena-cyan">→</span> Benchmark vs. baselines: +4.2% over MoleculeNet SOTA</div>
+          <div className="mt-2 space-y-1">
+            <AnimatePresence mode="popLayout">
+              {terminalLines.map((line, i) => {
+                if (getStatus(i) === 'pending') return null;
+                return (
+                  <motion.div
+                    key={line.text}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className="text-athena-text/70"
+                  >
+                    <span style={{ color: line.color }}>→</span> {line.text}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
-          <div className="mt-1 text-athena-emerald">
-            ✓ Pipeline complete — results saved to output/egfr_benchmark.json
-          </div>
+          <AnimatePresence>
+            {activeStage >= stages.length && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="mt-1 text-athena-emerald"
+              >
+                ✓ Pipeline complete — results saved to output/egfr_benchmark.json
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

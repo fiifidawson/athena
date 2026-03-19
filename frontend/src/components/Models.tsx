@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Database, Cpu, FlaskConical, BarChart3, Trophy, ArrowRight } from 'lucide-react';
+import PipelineVisualization from './PipelineVisualization';
 
 const stages = [
   {
@@ -124,8 +125,19 @@ export default function Pipeline() {
           </p>
         </motion.div>
 
+        {/* Interactive pipeline demo */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-16"
+        >
+          <PipelineVisualization />
+        </motion.div>
+
         {/* Stage Cards — top row of 3, bottom row of 2 centered */}
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
           {stages.slice(0, 3).map((stage, i) => (
             <motion.div
               key={stage.name}

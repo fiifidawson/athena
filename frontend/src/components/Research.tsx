@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Lightbulb, ArrowRight } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 
 const steps = [
   {
@@ -68,29 +68,26 @@ export default function HowItWorks() {
         </motion.div>
 
         {/* Steps */}
-        <div className="mt-16 space-y-6">
+        <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-5 md:gap-5">
           {steps.map((item, i) => (
             <motion.div
               key={item.step}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
-              className={`group flex flex-col gap-6 rounded-xl border ${item.borderColor} bg-athena-card/30 p-6 transition-colors hover:bg-athena-card/50 md:flex-row md:items-center`}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className={`group relative flex aspect-square flex-col justify-between rounded-xl border ${item.borderColor} bg-athena-card/30 p-5 transition-colors hover:bg-athena-card/50`}
             >
               {/* Step number */}
-              <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-athena-dark/80 font-mono text-lg font-bold ${item.color}`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-athena-dark/80 font-mono text-sm font-bold ${item.color}`}>
                 {item.step}
               </div>
 
               {/* Content */}
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-white">{item.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-athena-text">{item.description}</p>
+              <div>
+                <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-athena-text">{item.description}</p>
               </div>
-
-              {/* Arrow for desktop */}
-              <ArrowRight size={20} className="hidden shrink-0 text-athena-text/30 transition-colors group-hover:text-athena-text md:block" />
             </motion.div>
           ))}
         </div>
