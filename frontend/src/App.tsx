@@ -24,11 +24,12 @@ function App() {
     return () => document.removeEventListener('click', handler);
   }, []);
 
+  if (underConstruction) {
+    return <UnderConstruction onBack={() => setUnderConstruction(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-athena-dark">
-      {underConstruction && (
-        <UnderConstruction onBack={() => setUnderConstruction(false)} />
-      )}
       <Navbar />
       <Hero />
       <Pipeline />
