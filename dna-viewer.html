@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNA Structure Viewer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f5f2ed;
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+  #canvas-container { width: 100vw; height: 100vh; position: relative; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .overlay {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  .overlay button {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #2a3a2a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.02em;
+  }
+  .overlay button:hover {
+    background: rgba(255,255,255,0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+  .overlay button.active {
+    background: #3a6b4a;
+    color: #fff;
+    border-color: #3a6b4a;
+  }
+  .info-tag {
+    position: absolute;
+    top: 28px;
+    left: 32px;
+    z-index: 10;
+  }
+  .info-tag h1 {
+    font-size: 15px;
+    font-weight: 500;
+    color: #2a3a2a;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .info-tag p {
+    font-size: 12px;
+    font-weight: 300;
+    color: #6b7b6b;
+    letter-spacing: 0.02em;
+  }
+
+  .controls {
+    position: absolute;
+    top: 28px;
+    right: 32px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .controls label {
+    font-size: 11px;
+    font-weight: 400;
+    color: #6b7b6b;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+    padding: 6px 14px;
+    border-radius: 30px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .controls input[type="range"] {
+    width: 90px;
+    accent-color: #3a6b4a;
+  }
+</style>
+</head>
+<body>
+<div id="canvas-container">
+  <div class="info-tag">
+    <h1>DNA Double Helix</h1>
+    <p>B-form DNA &middot; Space-filling model &middot; Drag to rotate</p>
+  </div>
+
+  <div class="controls">
+    <label>Base Pairs <input type="range" id="bp-count" min="10" max="60" value="30" /><span id="bp-val">30</span></label>
+    <label>Atom Size <input type="range" id="atom-size" min="50" max="150" value="100" /><span id="size-val">1.0</span></label>
+  </div>
+
+  <div class="overlay">
+    <button class="active" data-style="spheres">Spheres</button>
+    <button data-style="glow">Glow</button>
+    <button data-style="sticks">Ball &amp; Stick</button>
+    <button data-style="skeleton">Skeleton</button>
+  </div>
+</div>
+
+<script>
+(function() {
+
+  const V3 = THREE.Vector3;
+  const container = document.getElementById('canvas-container');
+
+  // ── Scene ────────────────────────────────────────────
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf5f2ed);
+
+  const camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.1, 800);
+  camera.position.set(0, 0, 80);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+  container.appendChild(renderer.domElement);
+
+  // ── Lighting ─────────────────────────────────────────
+  scene.add(new THREE.AmbientLight(0xd0e8d4, 0.5));
+
+  const key = new THREE.DirectionalLight(0xffffff, 0.9);
+  key.position.set(40, 50, 60); scene.add(key);
+
+  const fill = new THREE.DirectionalLight(0x90d8a8, 0.45);
+  fill.position.set(-50, -20, 40); scene.add(fill);
+
+  const rim = new THREE.DirectionalLight(0x70ccbb, 0.3);
+  rim.position.set(10, 50, -50); scene.add(rim);
+
+  const bot = new THREE.DirectionalLight(0x55aa88, 0.2);
+  bot.position.set(-20, -50, 20); scene.add(bot);
+
+  // Subtle cyan point light for inner glow
+  const glowLight = new THREE.PointLight(0x60e8dd, 0.6, 40);
+  glowLight.position.set(0, 0, 0);
+  scene.add(glowLight);
+
+  // ── Controls ─────────────────────────────────────────
+  let drag=false, pm={x:0,y:0}, rT={x:0.3,y:0}, rC={x:0.3,y:0}, zoom=80;
+  container.addEventListener('mousedown', e=>{drag=true;pm={x:e.clientX,y:e.clientY};});
+  container.addEventListener('mousemove', e=>{
+    if(!drag)return;
+    rT.y+=(e.clientX-pm.x)*0.005; rT.x+=(e.clientY-pm.y)*0.005;
+    pm={x:e.clientX,y:e.clientY};
+  });
+  container.addEventListener('mouseup',()=>drag=false);
+  container.addEventListener('mouseleave',()=>drag=false);
+  container.addEventListener('wheel',e=>{zoom=Math.max(20,Math.min(200,zoom+e.deltaY*0.06));});
+  container.addEventListener('touchstart',e=>{drag=true;pm={x:e.touches[0].clientX,y:e.touches[0].clientY};});
+  container.addEventListener('touchmove',e=>{
+    if(!drag)return;e.preventDefault();
+    rT.y+=(e.touches[0].clientX-pm.x)*0.005;rT.x+=(e.touches[0].clientY-pm.y)*0.005;
+    pm={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  },{passive:false});
+  container.addEventListener('touchend',()=>drag=false);
+
+  // ── DNA Generator ────────────────────────────────────
+  // B-form DNA: 10 bp/turn, 3.4Å rise/bp, radius ~10Å
+  // Each nucleotide: sugar (5 atoms), phosphate (4 atoms), base (varies)
+  // Base pairs: A-T (Adenine-Thymine) or G-C (Guanine-Cytosine)
+
+  const HELIX_RADIUS = 10;   // Å — radius of double helix
+  const RISE_PER_BP = 3.4;   // Å — rise per base pair
+  const BP_PER_TURN = 10;    // base pairs per full turn
+  const MINOR_GROOVE_OFFSET = 0.12; // radians — minor groove asymmetry
+
+  let atomSizeMultiplier = 1.0;
+
+  function generateDNA(numBP) {
+    const atoms = [];
+    const sequence = [];
+    const bases = ['A','T','G','C'];
+
+    // Generate random sequence
+    for (let i = 0; i < numBP; i++) {
+      const b = bases[Math.floor(Math.random()*4)];
+      sequence.push(b);
+    }
+
+    // Complementary strand
+    const comp = { A:'T', T:'A', G:'C', C:'G' };
+
+    const totalHeight = numBP * RISE_PER_BP;
+    const yOffset = -totalHeight / 2;
+
+    for (let i = 0; i < numBP; i++) {
+      const y = i * RISE_PER_BP + yOffset;
+      const angle1 = (i / BP_PER_TURN) * 2 * Math.PI;
+      const angle2 = angle1 + Math.PI + MINOR_GROOVE_OFFSET; // opposite strand
+
+      const base1 = sequence[i];
+      const base2 = comp[base1];
+
+      // ── Strand 1 ──
+      buildNucleotide(atoms, angle1, y, HELIX_RADIUS, base1, 'A', i+1, 1);
+
+      // ── Strand 2 ──
+      buildNucleotide(atoms, angle2, y, HELIX_RADIUS, base2, 'B', i+1, -1);
+
+      // ── Base pair hydrogen bonds (atoms in the middle) ──
+      const cx1 = Math.cos(angle1) * HELIX_RADIUS * 0.45;
+      const cz1 = Math.sin(angle1) * HELIX_RADIUS * 0.45;
+      const cx2 = Math.cos(angle2) * HELIX_RADIUS * 0.45;
+      const cz2 = Math.sin(angle2) * HELIX_RADIUS * 0.45;
+      // Central bond atoms
+      const midX = (cx1+cx2)/2, midZ = (cz1+cz2)/2;
+      atoms.push({x:midX, y:y, z:midZ, element:'HB', chainId:'H', resSeq:i+1, resName:'HB', atomName:'HB', type:'hbond'});
+    }
+
+    return centerAtoms(atoms);
+  }
+
+  function buildNucleotide(atoms, angle, y, radius, base, chainId, resSeq, strandDir) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const perpX = -sin * strandDir;
+    const perpZ = cos * strandDir;
+
+    // ── Phosphate group (outermost) ──
+    // P, O1P, O2P, O5'
+    const px = cos * (radius + 1.5);
+    const pz = sin * (radius + 1.5);
+    atoms.push({x:px, y:y-0.8, z:pz, element:'P', chainId, resSeq, resName:base, atomName:'P'});
+    atoms.push({x:px+perpX*1.2, y:y-0.5, z:pz+perpZ*1.2, element:'O', chainId, resSeq, resName:base, atomName:'OP1'});
+    atoms.push({x:px-perpX*1.0, y:y-1.2, z:pz-perpZ*1.0, element:'O', chainId, resSeq, resName:base, atomName:'OP2'});
+    atoms.push({x:px+perpX*0.3, y:y+0.6, z:pz+perpZ*0.3, element:'O', chainId, resSeq, resName:base, atomName:'O5'});
+
+    // ── Sugar (deoxyribose) — 5 carbon ring + oxygen ──
+    const sx = cos * radius;
+    const sz = sin * radius;
+    atoms.push({x:sx, y:y, z:sz, element:'C', chainId, resSeq, resName:base, atomName:'C1'});
+    atoms.push({x:sx+perpX*1.0, y:y+0.7, z:sz+perpZ*1.0, element:'C', chainId, resSeq, resName:base, atomName:'C2'});
+    atoms.push({x:sx-perpX*0.8, y:y+0.5, z:sz-perpZ*0.8, element:'C', chainId, resSeq, resName:base, atomName:'C3'});
+    atoms.push({x:sx+perpX*0.5, y:y-0.9, z:sz+perpZ*0.5, element:'C', chainId, resSeq, resName:base, atomName:'C4'});
+    atoms.push({x:sx-perpX*0.6, y:y-0.7, z:sz-perpZ*0.6, element:'C', chainId, resSeq, resName:base, atomName:'C5'});
+    atoms.push({x:sx, y:y+1.2, z:sz, element:'O', chainId, resSeq, resName:base, atomName:'O4'});
+
+    // ── Base (inward toward center) ──
+    const bx = cos * (radius * 0.55);
+    const bz = sin * (radius * 0.55);
+
+    if (base === 'A' || base === 'G') {
+      // Purines — larger, double ring (9 atoms)
+      const offsets = [
+        [0, 0], [1.2, 0.3], [0.8, -1.1], [-0.5, -1.3], [-1.2, -0.3],
+        [-1.8, 0.8], [-0.3, 1.2], [0.6, 1.4], [1.5, 1.0]
+      ];
+      for (let j = 0; j < offsets.length; j++) {
+        const ox = offsets[j][0] * 0.8;
+        const oy = offsets[j][1] * 0.8;
+        const el = (j % 3 === 0) ? 'N' : 'C';
+        atoms.push({
+          x: bx + perpX * ox + cos * oy * 0.3,
+          y: y + oy * 0.5,
+          z: bz + perpZ * ox + sin * oy * 0.3,
+          element: el, chainId, resSeq, resName: base,
+          atomName: `B${j}`, type: 'base'
+        });
+      }
+      // Extra atoms for purine bulk
+      atoms.push({x:bx+perpX*0.5, y:y+0.8, z:bz+perpZ*0.5, element:base==='G'?'O':'N', chainId, resSeq, resName:base, atomName:'BX1', type:'base'});
+      atoms.push({x:bx-perpX*0.7, y:y-0.6, z:bz-perpZ*0.7, element:'N', chainId, resSeq, resName:base, atomName:'BX2', type:'base'});
+    } else {
+      // Pyrimidines — smaller, single ring (6 atoms)
+      const offsets = [
+        [0, 0], [1.0, 0.4], [0.6, -0.9], [-0.6, -0.9], [-1.0, 0.4], [0, 1.0]
+      ];
+      for (let j = 0; j < offsets.length; j++) {
+        const ox = offsets[j][0] * 0.8;
+        const oy = offsets[j][1] * 0.8;
+        const el = (j % 2 === 0) ? 'N' : 'C';
+        atoms.push({
+          x: bx + perpX * ox + cos * oy * 0.3,
+          y: y + oy * 0.5,
+          z: bz + perpZ * ox + sin * oy * 0.3,
+          element: el, chainId, resSeq, resName: base,
+          atomName: `B${j}`, type: 'base'
+        });
+      }
+      atoms.push({x:bx+perpX*0.3, y:y+0.5, z:bz+perpZ*0.3, element:base==='T'?'O':'N', chainId, resSeq, resName:base, atomName:'BX1', type:'base'});
+    }
+  }
+
+  function centerAtoms(atoms) {
+    let cx=0,cy=0,cz=0;
+    for(const a of atoms){cx+=a.x;cy+=a.y;cz+=a.z;}
+    cx/=atoms.length;cy/=atoms.length;cz/=atoms.length;
+    for(const a of atoms){a.x-=cx;a.y-=cy;a.z-=cz;}
+    return atoms;
+  }
+
+  // ── Rendering ────────────────────────────────────────
+  let dnaGroup = new THREE.Group();
+  scene.add(dnaGroup);
+  let currentStyle = 'spheres';
+  let atomsData = [];
+
+  const sphereGeo = new THREE.SphereGeometry(1, 20, 14);
+
+  const RAD = { C:1.7, N:1.55, O:1.52, S:1.8, P:1.8, HB:0.6 };
+
+  function getColor(atom, style) {
+    if (style === 'glow') {
+      // Distance from helix axis (x-z plane distance)
+      const distFromAxis = Math.sqrt(atom.x*atom.x + atom.z*atom.z);
+      const maxR = HELIX_RADIUS + 3;
+      const t = Math.max(0, 1 - distFromAxis / (maxR * 0.6));
+      const outerGreen = new THREE.Color(0x6aad7a);
+      const innerCyan = new THREE.Color(0x6aeaf2);
+      return outerGreen.clone().lerp(innerCyan, t * t);
+    }
+
+    // Element + location based coloring
+    if (atom.type === 'hbond') return new THREE.Color(0x90e8ee);
+    if (atom.type === 'base') {
+      // Bases: slightly different tint per base
+      const tints = {
+        A: new THREE.Color().setHSL(160/360, 0.35, 0.58),
+        T: new THREE.Color().setHSL(140/360, 0.30, 0.62),
+        G: new THREE.Color().setHSL(175/360, 0.40, 0.56),
+        C: new THREE.Color().setHSL(130/360, 0.28, 0.60),
+      };
+      return tints[atom.resName] || new THREE.Color(0x7ab88a);
+    }
+    if (atom.element === 'P') return new THREE.Color().setHSL(45/360, 0.35, 0.58);
+    if (atom.element === 'O') return new THREE.Color().setHSL(155/360, 0.32, 0.52);
+    if (atom.element === 'N') return new THREE.Color().setHSL(190/360, 0.40, 0.60);
+    // Default carbon/sugar: soft green
+    const shift = atom.chainId === 'A' ? 0 : 15;
+    return new THREE.Color().setHSL((138 + shift)/360, 0.26, 0.63);
+  }
+
+  function makeMat(color, isGlow) {
+    return new THREE.MeshPhysicalMaterial({
+      color,
+      roughness: isGlow ? 0.12 : 0.45,
+      metalness: isGlow ? 0.06 : 0.02,
+      clearcoat: isGlow ? 0.95 : 0.4,
+      clearcoatRoughness: 0.12,
+      transparent: isGlow,
+      opacity: isGlow ? 0.9 : 1.0,
+    });
+  }
+
+  function buildModel(style) {
+    // Dispose
+    while (dnaGroup.children.length) {
+      const c = dnaGroup.children[0];
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) c.material.dispose();
+      dnaGroup.remove(c);
+    }
+
+    const isGlow = style === 'glow';
+    const isSkel = style === 'skeleton';
+    const isStick = style === 'sticks';
+
+    let display = atomsData;
+    if (isSkel) {
+      // Show only backbone P and sugar C1' atoms
+      display = atomsData.filter(a => a.atomName === 'P' || a.atomName === 'C1' || a.type === 'hbond');
+    }
+
+    // Group by color for instancing
+    const groups = {};
+    for (const atom of display) {
+      const color = getColor(atom, style);
+      const k = color.getHexString();
+      if (!groups[k]) groups[k] = { color, atoms: [] };
+      groups[k].atoms.push(atom);
+    }
+
+    for (const k of Object.keys(groups)) {
+      const g = groups[k];
+      const mesh = new THREE.InstancedMesh(sphereGeo, makeMat(g.color, isGlow), g.atoms.length);
+      const dummy = new THREE.Object3D();
+
+      for (let i = 0; i < g.atoms.length; i++) {
+        const a = g.atoms[i];
+        let r = RAD[a.element] || 1.5;
+        if (a.type === 'hbond') r = 0.6;
+        let s;
+        if (isStick) s = r * 0.3;
+        else if (isSkel) s = r * 0.7;
+        else s = r * 0.78 * atomSizeMultiplier;
+
+        dummy.position.set(a.x, a.y, a.z);
+        dummy.scale.setScalar(s);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+      }
+      dnaGroup.add(mesh);
+    }
+
+    // Backbone connections for skeleton mode
+    if (isSkel) {
+      const tubeMat = new THREE.MeshPhysicalMaterial({ color: 0x7cb88a, roughness: 0.5, clearcoat: 0.3 });
+      for (const chain of ['A', 'B']) {
+        const ps = atomsData.filter(a => a.chainId === chain && a.atomName === 'P')
+          .sort((a,b) => a.resSeq - b.resSeq);
+        for (let i = 0; i < ps.length - 1; i++) {
+          const s = new V3(ps[i].x, ps[i].y, ps[i].z);
+          const e = new V3(ps[i+1].x, ps[i+1].y, ps[i+1].z);
+          const len = s.distanceTo(e);
+          if (len > 8) continue;
+          const mid = s.clone().add(e).multiplyScalar(0.5);
+          const geo = new THREE.CylinderGeometry(0.35, 0.35, len, 6, 1);
+          const tube = new THREE.Mesh(geo, tubeMat);
+          tube.position.copy(mid); tube.lookAt(e); tube.rotateX(Math.PI/2);
+          dnaGroup.add(tube);
+        }
+      }
+      // H-bond lines across
+      const hbMat = new THREE.MeshPhysicalMaterial({ color: 0x80dddd, roughness: 0.3, transparent: true, opacity: 0.6 });
+      const c1s_A = atomsData.filter(a => a.chainId === 'A' && a.atomName === 'C1').sort((a,b) => a.resSeq - b.resSeq);
+      const c1s_B = atomsData.filter(a => a.chainId === 'B' && a.atomName === 'C1').sort((a,b) => a.resSeq - b.resSeq);
+      const n = Math.min(c1s_A.length, c1s_B.length);
+      for (let i = 0; i < n; i++) {
+        const s = new V3(c1s_A[i].x, c1s_A[i].y, c1s_A[i].z);
+        const e = new V3(c1s_B[i].x, c1s_B[i].y, c1s_B[i].z);
+        const len = s.distanceTo(e);
+        const mid = s.clone().add(e).multiplyScalar(0.5);
+        const geo = new THREE.CylinderGeometry(0.15, 0.15, len, 4, 1);
+        const tube = new THREE.Mesh(geo, hbMat);
+        tube.position.copy(mid); tube.lookAt(e); tube.rotateX(Math.PI/2);
+        dnaGroup.add(tube);
+      }
+    }
+
+    // Bond sticks
+    if (isStick) {
+      const bMat = new THREE.MeshPhysicalMaterial({ color: 0x88aa88, roughness: 0.55 });
+      const cellSize = 2.2, grid = {};
+      for (let i = 0; i < display.length; i++) {
+        const a = display[i];
+        const gx=Math.floor(a.x/cellSize),gy=Math.floor(a.y/cellSize),gz=Math.floor(a.z/cellSize);
+        const key=`${gx},${gy},${gz}`;
+        if(!grid[key])grid[key]=[];
+        grid[key].push(i);
+      }
+      for (let i = 0; i < display.length; i++) {
+        const a = display[i];
+        const gx=Math.floor(a.x/cellSize),gy=Math.floor(a.y/cellSize),gz=Math.floor(a.z/cellSize);
+        for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){
+          const nbrs = grid[`${gx+dx},${gy+dy},${gz+dz}`];
+          if(!nbrs) continue;
+          for(const j of nbrs) {
+            if(j<=i) continue;
+            const b = display[j];
+            const dist = Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
+            if(dist < 2.2 && dist > 0.3) {
+              const s = new V3(a.x,a.y,a.z), e = new V3(b.x,b.y,b.z);
+              const mid = s.clone().add(e).multiplyScalar(0.5);
+              const geo = new THREE.CylinderGeometry(0.06,0.06,dist,4,1);
+              const bond = new THREE.Mesh(geo, bMat);
+              bond.position.copy(mid); bond.lookAt(e); bond.rotateX(Math.PI/2);
+              dnaGroup.add(bond);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ── Auto-fit ─────────────────────────────────────────
+  function autoFit() {
+    let maxR = 0;
+    for (const a of atomsData) {
+      const d = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+      if (d > maxR) maxR = d;
+    }
+    zoom = maxR * 2.5;
+  }
+
+  // ── Init ─────────────────────────────────────────────
+  let numBP = 30;
+
+  function rebuild() {
+    atomsData = generateDNA(numBP);
+    autoFit();
+    buildModel(currentStyle);
+  }
+
+  rebuild();
+
+  // UI
+  document.querySelectorAll('.overlay button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.overlay button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentStyle = btn.dataset.style;
+      buildModel(currentStyle);
+    });
+  });
+
+  document.getElementById('bp-count').addEventListener('input', e => {
+    numBP = parseInt(e.target.value);
+    document.getElementById('bp-val').textContent = numBP;
+    rebuild();
+  });
+
+  document.getElementById('atom-size').addEventListener('input', e => {
+    atomSizeMultiplier = parseInt(e.target.value) / 100;
+    document.getElementById('size-val').textContent = atomSizeMultiplier.toFixed(1);
+    buildModel(currentStyle);
+  });
+
+  // ── Animate ──────────────────────────────────────────
+  function animate() {
+    requestAnimationFrame(animate);
+    rC.x += (rT.x - rC.x) * 0.07;
+    rC.y += (rT.y - rC.y) * 0.07;
+    if (!drag) rT.y += 0.002;
+    dnaGroup.rotation.x = rC.x;
+    dnaGroup.rotation.y = rC.y;
+    camera.position.z += (zoom - camera.position.z) * 0.07;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+})();
+</script>
+</body>
+</html>
