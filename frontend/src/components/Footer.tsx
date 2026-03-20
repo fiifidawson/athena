@@ -25,11 +25,9 @@ export default function Footer() {
       { label: 'GitHub', href: '#' },
       { label: 'Discussions', href: '#' },
       { label: 'Contributing', href: '#' },
-      { label: 'Changelog', href: '#' },
     ],
     Project: [
       { label: 'About', href: '#about' },
-      { label: 'Roadmap', href: '#' },
       { label: 'License', href: '#' },
     ],
   };
