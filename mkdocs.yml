@@ -1,0 +1,108 @@
+site_name: Athena
+site_description: AutoML for drug discovery — implementation playbook
+site_url: https://fiifidawson.github.io/athena/
+repo_url: https://github.com/fiifidawson/athena
+repo_name: fiifidawson/athena
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: light blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: light blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.keys
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Implementation:
+      - implementation/index.md
+      - 00 · Prerequisites: implementation/00-prerequisites.md
+      - 01 · Repo Layout: implementation/01-repo-layout.md
+      - 02 · Backend Skeleton: implementation/02-backend-skeleton.md
+      - 03 · Database & Migrations: implementation/03-database.md
+      - 04 · Authentication: implementation/04-auth.md
+      - 05 · Background Jobs: implementation/05-jobs.md
+      - 06 · Code-Snippet Recorder: implementation/06-code-snippets.md
+      - 07 · MLflow (Manual): implementation/07-mlflow.md
+      - 08 · HuggingFace (Manual): implementation/08-huggingface.md
+      - 09 · Frontend Integration: implementation/09-frontend.md
+      - 10 · Deploy (Vercel + Render): implementation/10-deploy.md
+      - 11 · Observability: implementation/11-observability.md
+      - 12 · Testing: implementation/12-testing.md
+  - Future:
+      - future/index.md
+      - Local-First with Tauri: future/tauri.md
+      - Roadmap: future/roadmap.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/fiifidawson/athena
+  generator: false
+
+copyright: Copyright &copy; 2026 Athena
