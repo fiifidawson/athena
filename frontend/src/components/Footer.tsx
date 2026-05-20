@@ -22,7 +22,7 @@ export default function Footer() {
       { label: 'Examples', href: '#' },
     ],
     Community: [
-      { label: 'GitHub', href: '#' },
+      { label: 'GitHub', href: 'https://github.com/fiifidawson/athena', external: true },
       { label: 'Discussions', href: '#' },
       { label: 'Contributing', href: '#' },
     ],
@@ -56,6 +56,9 @@ export default function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
+                      {...('external' in link && link.external
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
                       className="text-sm text-athena-text transition-colors hover:text-white"
                     >
                       {link.label}
@@ -79,7 +82,12 @@ export default function Footer() {
             <a href="#" className="text-xs text-athena-text/60 transition-colors hover:text-athena-text">
               Privacy
             </a>
-            <a href="#" className="flex items-center gap-1 text-xs text-athena-text/60 transition-colors hover:text-athena-text">
+            <a
+              href="https://github.com/fiifidawson/athena"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-athena-text/60 transition-colors hover:text-athena-text"
+            >
               <GitHubIcon size={12} />
               GitHub
             </a>
