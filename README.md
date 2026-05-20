@@ -31,19 +31,6 @@ It's aimed at:
 
 > ⚠️ **Pre-alpha.** The landing page is live; the application is being built per the [implementation playbook](https://fiifidawson.github.io/athena/implementation/). Star the repo to follow along.
 
-## Screenshots
-
-The dashboard (inspired by Unsloth Studio, adapted for drug discovery):
-
-<table>
-<tr>
-<td><img src="references/dashboard_1.png" alt="Configure screen" /></td>
-<td><img src="references/dashboard_2.jpg" alt="Configure + live run" /></td>
-</tr>
-</table>
-
-*(Reference designs; the Athena UI ships with its own dark theme.)*
-
 ## Architecture at a glance
 
 ```
@@ -144,7 +131,3 @@ revert:   revert a previous commit
 ## License
 
 [Apache 2.0](LICENSE).
-
-## Acknowledgements
-
-The application UI is inspired by [**Unsloth Studio**](https://github.com/unslothai/unsloth) — both the [reference dashboard](references/) and several frontend patterns (sidecar Tauri shell, shiki code rendering) are derived from study of their open-source codebase. Athena is an independent project for drug-discovery AutoML, not affiliated with Unsloth.
