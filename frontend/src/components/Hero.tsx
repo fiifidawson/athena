@@ -69,7 +69,9 @@ export default function Hero() {
             <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
           </a>
           <a
-            href="#"
+            href="https://github.com/fiifidawson/athena"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-xl border border-athena-border bg-athena-dark/40 px-6 py-3 font-medium text-athena-text-bright backdrop-blur-sm transition-all hover:border-athena-amber/50 hover:bg-athena-card/50"
           >
             <GitHubIcon size={18} />
