@@ -42,16 +42,8 @@ export default function CTA() {
               </a>
             </div>
 
-            <div className="mt-10 rounded-lg border border-athena-border/50 bg-athena-dark/50 px-6 py-3 inline-block">
-              <code className="font-mono text-sm text-athena-text">
-                <span className="text-athena-emerald">$</span>{' '}
-                <span className="text-athena-amber">pip install</span>{' '}
-                <span className="text-white">athena-drug-discovery</span>
-              </code>
-            </div>
-
-            <p className="mt-6 text-sm text-athena-text/60">
-              Open source · MIT licensed · Python 3.9+
+            <p className="mt-10 text-sm text-athena-text/60">
+              Open source · MIT licensed
             </p>
           </div>
         </motion.div>
