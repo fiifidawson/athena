@@ -48,7 +48,9 @@ export default function Navbar() {
         {/* CTA Buttons */}
         <div className="hidden items-center gap-3 md:flex">
           <a
-            href="#"
+            href="https://github.com/fiifidawson/athena"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-lg border border-athena-border px-4 py-2 text-sm text-athena-text-bright transition-colors hover:border-athena-amber/50 hover:text-white"
           >
             <GitHubIcon size={16} />
@@ -94,7 +96,9 @@ export default function Navbar() {
               ))}
               <div className="mt-2 flex flex-col gap-3">
                 <a
-                  href="#"
+                  href="https://github.com/fiifidawson/athena"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-lg border border-athena-border px-4 py-2 text-sm text-athena-text-bright"
                 >
                   <GitHubIcon size={16} />
