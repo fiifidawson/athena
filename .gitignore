@@ -1,3 +1,80 @@
+# ─── tooling / editor ────────────────────────────────────────────────
 .claude/
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
 
+# ─── references (private learning material, do not publish) ──────────
 references/
+
+# ─── secrets / env ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ─── python / backend ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+env/
+.python-version
+
+# ─── node / frontend ─────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── docs (mkdocs build output) ──────────────────────────────────────
+site/
+
+# ─── athena runtime data ─────────────────────────────────────────────
+# local sqlite db (dev only — prod uses Postgres)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/data/
+storage/
+
+# mlflow tracking dir (when using local file backend)
+mlruns/
+mlartifacts/
+
+# huggingface cache (per-user, never committed)
+.cache/huggingface/
+
+# model artifacts + checkpoints (large, regenerable)
+artifacts/
+checkpoints/
+models/*.pt
+models/*.pkl
+models/*.joblib
+models/*.onnx
+models/*.bin
+models/*.safetensors
+
+# uploaded datasets
+uploads/
+
+# ─── future: tauri build artifacts ───────────────────────────────────
+src-tauri/target/
+src-tauri/gen/

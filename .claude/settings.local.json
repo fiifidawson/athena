@@ -24,7 +24,9 @@
       "Bash(node --version)",
       "Bash(npm ls *)",
       "Bash(node -e \"console.log\\(require\\('sharp'\\).versions\\)\")",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(python -m pip install -q mkdocs==1.6.1 mkdocs-material==9.5.49 pymdown-extensions==10.12)",
+      "Bash(python -m mkdocs build --strict)"
     ]
   }
 }
